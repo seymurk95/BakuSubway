@@ -6,7 +6,7 @@
 #include <mutex>
 #include <vector>
 #include <string>
-#include <memory>
+#include <map>
 
 class BakuSubway {
 public:
@@ -14,12 +14,19 @@ public:
     void run();
 
 private:
-    std::vector<std::string> stations;
-    std::vector<std::unique_ptr<std::mutex>> stationMutexes;
-    std::mutex coutMutex; // Мьютекс для защиты std::cout
+    struct Line {
+        std::vector<std::string> stations;
+        std::string depot;
+        std::vector<std::mutex> forward_mutexes;  
+        std::vector<std::mutex> backward_mutexes; 
+        bool is_shuttle = false; 
+    };
 
-    void train(int trainId, int direction);
-    void safePrint(const std::string& message); // Потокобезопасный вывод
+    std::map<std::string, Line> lines;
+    std::mutex cout_mutex;
+
+    void train(int train_id, const std::string& line_name, int direction);
+    void safe_print(const std::string& message);
 };
 
 #endif // BAKUSUBWAY_H
