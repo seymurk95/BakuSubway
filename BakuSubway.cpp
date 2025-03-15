@@ -1,16 +1,16 @@
 #include "BakuSubway.h"
 #include <map>
 
-// Структура для хранения информации о станции
+
 struct StationMutexes {
-    std::map<std::string, std::mutex> transition_mutexes; // mutex для переходов от станции
+    std::map<std::string, std::mutex> transition_mutexes; 
 };
 
 BakuSubway::BakuSubway() {
-    // Инициализация общих mutex'ов для станций
+    
     std::map<std::string, StationMutexes> station_mutexes;
 
-    // Red Line (5 stations, 4 transitions)
+    
     lines["Red"] = {
         {"Bakmil", "Nariman Narimanov", "28 May", "Sahil", "Icheri Sheher"},
         "Bakmil",
@@ -18,7 +18,7 @@ BakuSubway::BakuSubway() {
         std::vector<std::mutex>(4)
     };
 
-    // Green Line (11 stations, 10 transitions)
+    
     lines["Green"] = {
         {"Bakmil", "Nariman Narimanov", "28 May", "Nizami", "Elmlar Akademiyasy",
          "Inshaatchilar", "20 January", "Memar Ajami", "Nasimi", "Azadlig Prospekti", "Darnagul"},
@@ -27,7 +27,7 @@ BakuSubway::BakuSubway() {
         std::vector<std::mutex>(10)
     };
 
-    // Purple Line (4 stations, 3 transitions)
+    
     lines["Purple"] = {
         {"Khojasan", "Avtovokzal", "Memar Ajami", "8 November"},
         "Khojasan",
@@ -35,7 +35,7 @@ BakuSubway::BakuSubway() {
         std::vector<std::mutex>(3)
     };
 
-    // Light Green Line (2 stations, 1 transition)
+    
     lines["Light Green"] = {
         {"Jafar Jabbarly", "Hatai"},
         "N/A",
@@ -58,7 +58,7 @@ void BakuSubway::train(int train_id, const std::string& line_name, int direction
     int laps = 0;
     bool is_shuttle = line.is_shuttle;
 
-    // Создаем общий пул mutex'ов для общих станций
+    
     static std::map<std::string, std::mutex> shared_station_mutexes;
     static std::mutex init_mutex;
     {
@@ -71,10 +71,10 @@ void BakuSubway::train(int train_id, const std::string& line_name, int direction
     while (laps < 20) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        // Блокируем текущую станцию для всех линий
+    
         std::unique_lock<std::mutex> station_lock(shared_station_mutexes[stations[current_station]]);
 
-        // Блокируем переход только если есть следующая станция
+    
         std::unique_lock<std::mutex> transition_lock;
         if (!is_shuttle && current_station + step >= 0 && current_station + step < static_cast<int>(stations.size())) {
             if (direction == 0 && current_station < static_cast<int>(line.forward_mutexes.size())) {
@@ -94,10 +94,9 @@ void BakuSubway::train(int train_id, const std::string& line_name, int direction
         safe_print("Train " + std::to_string(train_id) +
                   " (" + line_name + ") departed from " + stations[current_station]);
 
-        // Освобождаем станцию перед перемещением
-        station_lock.unlock();
+            station_lock.unlock();
 
-        // Логика движения
+    
         if (is_shuttle) {
             current_station += step;
             if (current_station < 0 || current_station >= static_cast<int>(stations.size())) {
