@@ -1,13 +1,20 @@
 cmake_minimum_required(VERSION 3.10)
 project(BakuSubway)
 
-option(BUILD_SHARED_LIBS "build using shared libraries" ON)
-
+# Устанавливаем стандарт C++20
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_library(BakuSubway BakuSubway.cpp)
-target_include_directories(BakuSubway PUBLIC ${CMAKE_SOURCE_DIR})
+# Добавляем библиотеку BakuSubway
+add_library(BakuSubwayLib STATIC BakuSubway.cpp)
+target_include_directories(BakuSubwayLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(BakuSubway main.cpp BakuSubway.cpp)
+# Добавляем исполняемый файл
+add_executable(BakuSubway main.cpp)
 
-target_link_libraries(main PRIVATE BakuSubway)
+# Линкуем библиотеку с исполняемым файлом
+target_link_libraries(BakuSubway PRIVATE BakuSubwayLib)
+
+# Добавляем поддержку потоков
+find_package(Threads REQUIRED)
+target_link_libraries(BakuSubway PRIVATE Threads::Threads)
